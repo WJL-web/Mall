@@ -1,0 +1,15 @@
+# Maven #
+target/
+
+# IDEA #
+.idea/
+*.iml
+
+# Eclipse #
+.settings/
+.classpath
+.project
+
+# Local runtime data #
+data/
+logs/

@@ -1,0 +1,84 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 3307:3306
+    volumes:
+      - ./data/mysql/db:/var/lib/mysql
+      - ./data/mysql/conf:/etc/mysql/conf.d
+      - ./data/mysql/log:/var/log/mysql
+  redis:
+    image: redis:7
+    container_name: redis
+    command: redis-server --appendonly yes
+    volumes:
+      - ./data/redis/data:/data
+    ports:
+      - 6379:6379
+  rabbitmq:
+    image: rabbitmq:3.10.5-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: mall
+      RABBITMQ_DEFAULT_PASS: mall
+      RABBITMQ_DEFAULT_VHOST: /mall
+    volumes:
+      - ./data/rabbitmq/data:/var/lib/rabbitmq
+      - ./data/rabbitmq/log:/var/log/rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+  elasticsearch:
+    image: docker.m.daocloud.io/library/elasticsearch:7.17.20
+    container_name: elasticsearch
+    user: root
+    environment:
+      - "cluster.name=elasticsearch"
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1024m"
+    volumes:
+      - ./data/elasticsearch/plugins:/usr/share/elasticsearch/plugins
+      - ./data/elasticsearch/data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+  mongo:
+    image: docker.m.daocloud.io/library/mongo:4
+    container_name: mongo
+    volumes:
+      - ./data/mongo/db:/data/db
+    ports:
+      - 27017:27017
+  minio:
+    image: docker.m.daocloud.io/minio/minio:RELEASE.2023-01-25T00-19-54Z
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ./data/minio/data:/data
+    ports:
+      - 9000:9000
+      - 9001:9001
+  nacos:
+    image: docker.m.daocloud.io/nacos/nacos-server:v2.1.0
+    container_name: nacos
+    environment:
+      - "MODE=standalone"
+      - "JVM_XMS=256m"
+      - "JVM_XMX=512m"
+      - "JVM_XMN=256m"
+    volumes:
+      - ./data/nacos/logs:/home/nacos/logs
+      - ./data/nacos/data:/home/nacos/data
+    ports:
+      - 8848:8848
+      - 9848:9848
+      - 9849:9849
